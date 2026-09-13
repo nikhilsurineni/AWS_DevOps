@@ -1,0 +1,15 @@
+deploy_enabled  = false
+enable_notifier = false
+
+environment         = "dev"
+aws_region          = "us-east-1"
+expected_region     = ""
+expected_account_id = ""
+owner               = ""
+expires_on          = ""
+availability_zones  = []
+
+# Set only after a reviewed WebSocket API and local zip exist.
+lambda_package_path              = ""
+websocket_management_endpoint    = ""
+websocket_manage_connections_arn = ""

@@ -1,0 +1,13 @@
+deploy_enabled  = false
+enable_notifier = false
+
+environment         = "eks-lab"
+aws_region          = "us-east-1"
+expected_region     = ""
+expected_account_id = ""
+owner               = ""
+expires_on          = ""
+availability_zones  = []
+
+# This baseline does not create EKS. This value reserves an isolated state/tag
+# boundary for a later, reviewed, time-boxed EKS lab.

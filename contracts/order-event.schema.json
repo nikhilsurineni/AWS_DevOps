@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orderflow.example/schemas/order-event.schema.json",
+  "title": "OrderFlow order event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "order_id",
+    "event_type",
+    "status",
+    "sequence",
+    "occurred_at",
+    "correlation_id",
+    "source",
+    "environment"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "event_id": { "type": "string", "format": "uuid" },
+    "order_id": { "type": "string", "format": "uuid" },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "order.created",
+        "order.validated",
+        "order.packed",
+        "order.shipped",
+        "order.delivered",
+        "order.failed"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["CREATED", "VALIDATED", "PACKED", "SHIPPED", "DELIVERED", "FAILED"]
+    },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "correlation_id": { "type": "string", "format": "uuid" },
+    "source": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "environment": { "type": "string", "enum": ["local", "personal-learning", "enterprise-sandbox"] }
+  }
+}

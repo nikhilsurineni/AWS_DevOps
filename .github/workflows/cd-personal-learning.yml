@@ -1,0 +1,57 @@
+name: Personal-learning CD preflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      acknowledgement:
+        description: Type PREFLIGHT_PERSONAL_LEARNING
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: personal-learning-cd
+  cancel-in-progress: false
+
+jobs:
+  oidc-preflight:
+    if: github.event.inputs.acknowledgement == 'PREFLIGHT_PERSONAL_LEARNING'
+    runs-on: ubuntu-latest
+    environment: personal-learning
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Require repository environment configuration
+        shell: bash
+        env:
+          ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+          EXPECTED_ACCOUNT: ${{ vars.EXPECTED_AWS_ACCOUNT_ID }}
+          TARGET_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          test -n "$ROLE_ARN"
+          [[ "$EXPECTED_ACCOUNT" =~ ^[0-9]{12}$ ]]
+          test -n "$TARGET_REGION"
+      - uses: aws-actions/configure-aws-credentials@v6.2.4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          allowed-account-ids: ${{ vars.EXPECTED_AWS_ACCOUNT_ID }}
+          mask-aws-account-id: true
+          role-session-name: orderflow-${{ github.run_id }}
+      - name: Fail closed on account or Region mismatch
+        shell: bash
+        env:
+          EXPECTED_ACCOUNT: ${{ vars.EXPECTED_AWS_ACCOUNT_ID }}
+          TARGET_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          actual_account="$(aws sts get-caller-identity --query Account --output text)"
+          test "$actual_account" = "$EXPECTED_ACCOUNT"
+          configured_region="$(aws configure get region)"
+          test "$configured_region" = "$TARGET_REGION"
+          echo "OIDC account and Region preflight confirmed; no deployment was performed."
+      - name: Deployment gate
+        run: |
+          echo "This scaffold intentionally stops before build, push, Terraform apply, or ECS update."
+          echo "Add deployment only after the personal OIDC trust and rollback contract are reviewed."

@@ -1,0 +1,60 @@
+name: orderflow
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: orderflow
+      POSTGRES_USER: orderflow
+      POSTGRES_PASSWORD: orderflow-local-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orderflow -d orderflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - orderflow-postgres:/var/lib/postgresql/data
+    networks: [orderflow]
+
+  api:
+    build:
+      context: ./apps/api
+      target: runtime
+    environment:
+      ORDERFLOW_DATABASE_URL: postgresql+psycopg://orderflow:orderflow-local-only@db:5432/orderflow
+      ORDERFLOW_ENVIRONMENT: local
+      ORDERFLOW_CORS_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+    command:
+      - /bin/sh
+      - -c
+      - alembic upgrade head && exec uvicorn orderflow_api.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [orderflow]
+
+  web:
+    build:
+      context: ./apps/web
+    environment:
+      API_UPSTREAM: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks: [orderflow]
+
+networks:
+  orderflow:
+    driver: bridge
+
+volumes:
+  orderflow-postgres:

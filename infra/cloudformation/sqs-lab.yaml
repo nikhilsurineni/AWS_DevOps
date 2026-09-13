@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: OrderFlow SQS/DLQ lab; resources are disabled by default.
+
+Parameters:
+  EnableLab:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['false', 'true']
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, eks-lab]
+  Owner:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^.{2,}$'
+  ExpiresOn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^20[0-9]{2}-[0-9]{2}-[0-9]{2}$'
+
+Conditions:
+  CreateResources: !Equals [!Ref EnableLab, 'true']
+
+Rules:
+  RequiredMetadataWhenEnabled:
+    RuleCondition: !Equals [!Ref EnableLab, 'true']
+    Assertions:
+      - Assert: !Not [!Equals [!Ref Owner, '']]
+        AssertDescription: Owner is mandatory when the lab is enabled.
+      - Assert: !Not [!Equals [!Ref ExpiresOn, '']]
+        AssertDescription: ExpiresOn is mandatory when the lab is enabled.
+
+Resources:
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Condition: CreateResources
+    Properties:
+      QueueName: !Sub 'orderflow-${Environment}-cfn-dlq'
+      KmsMasterKeyId: alias/aws/sqs
+      MessageRetentionPeriod: 1209600
+      Tags:
+        - { Key: Project, Value: OrderFlow }
+        - { Key: Environment, Value: !Ref Environment }
+        - { Key: Owner, Value: !Ref Owner }
+        - { Key: ManagedBy, Value: CloudFormation }
+        - { Key: ExpiresOn, Value: !Ref ExpiresOn }
+
+  OrderQueue:
+    Type: AWS::SQS::Queue
+    Condition: CreateResources
+    Properties:
+      QueueName: !Sub 'orderflow-${Environment}-cfn-orders'
+      KmsMasterKeyId: alias/aws/sqs
+      MessageRetentionPeriod: 345600
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeout: 60
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 5
+      Tags:
+        - { Key: Project, Value: OrderFlow }
+        - { Key: Environment, Value: !Ref Environment }
+        - { Key: Owner, Value: !Ref Owner }
+        - { Key: ManagedBy, Value: CloudFormation }
+        - { Key: ExpiresOn, Value: !Ref ExpiresOn }
+
+Outputs:
+  ResourceCreationEnabled:
+    Value: !Ref EnableLab
+  OrderQueueUrl:
+    Condition: CreateResources
+    Value: !Ref OrderQueue
+  DeadLetterQueueUrl:
+    Condition: CreateResources
+    Value: !Ref DeadLetterQueue

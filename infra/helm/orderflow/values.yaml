@@ -1,0 +1,47 @@
+global:
+  environment: dev
+  requireDigest: false
+  existingSecret: ""
+  serviceAccountAnnotations: {}
+
+api:
+  replicaCount: 1
+  image:
+    repository: orderflow-api
+    tag: local
+    digest: ""
+    pullPolicy: IfNotPresent
+  port: 8000
+  command: []
+  args: []
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+worker:
+  replicaCount: 1
+  image:
+    repository: orderflow-worker
+    tag: local
+    digest: ""
+    pullPolicy: IfNotPresent
+  command: []
+  args: []
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+service:
+  type: ClusterIP
+  port: 80
+
+podDisruptionBudget:
+  enabled: true
+
+networkPolicy:
+  enabled: true

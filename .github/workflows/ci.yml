@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: |
+            apps/api/pyproject.toml
+            functions/realtime-notifier/requirements-dev.txt
+      - name: Install backend checks
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e 'apps/api[dev]'
+          python -m pip install -r functions/realtime-notifier/requirements-dev.txt
+          python -m pip install 'ruff>=0.13,<1' 'mypy>=1.18,<2'
+      - name: Lint and type-check
+        run: |
+          ruff check apps/api functions/realtime-notifier
+          mypy --ignore-missing-imports apps/api/src
+      - name: Test
+        run: |
+          pytest apps/api
+          pytest functions/realtime-notifier
+      - name: Build API image
+        run: docker build --tag orderflow-api:${{ github.sha }} apps/api
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Build web image
+        working-directory: .
+        run: docker build --tag orderflow-web:${{ github.sha }} apps/web
+
+  infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: hashicorp/setup-terraform@v4.0.1
+        with:
+          terraform_version: 1.13.5
+      - name: Terraform format and validate
+        run: |
+          terraform -chdir=infra/terraform fmt -check -recursive
+          terraform -chdir=infra/terraform init -backend=false
+          terraform -chdir=infra/terraform validate
+          terraform -chdir=infra/terraform plan -input=false -lock=false -refresh=false -var-file=examples/dev.tfvars.example -out=safe.tfplan
+      - name: Confirm the safe plan is resource-free
+        run: |
+          terraform -chdir=infra/terraform show -json safe.tfplan > infra/terraform/safe-plan.json
+          test "$(jq '[.resource_changes[]? | select(.change.actions != ["no-op"])] | length' infra/terraform/safe-plan.json)" -eq 0
+      - name: Validate CloudFormation syntax
+        run: |
+          python -m pip install 'cfn-lint>=1.39,<2'
+          cfn-lint infra/cloudformation/sqs-lab.yaml
+      - name: Lint Helm chart
+        run: |
+          helm lint infra/helm/orderflow
+          helm template orderflow infra/helm/orderflow --namespace orderflow >/dev/null
