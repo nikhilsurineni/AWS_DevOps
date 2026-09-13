@@ -1,7 +1,7 @@
 # Week 3: Git and GitHub
 
-Status: **Partial** on 13 September 2026. Local repository controls are confirmed;
-remote publication and repository-side controls remain pending.
+Status: **Partial** on 13 September 2026. Public publication and CI are confirmed;
+branch protection and the practice pull-request exercise remain pending.
 
 ## Learning outcomes
 
@@ -22,16 +22,22 @@ remote publication and repository-side controls remain pending.
 - CI definitions cover backend, frontend, containers, Terraform, CloudFormation, and Helm.
 - Contribution and security policies define synthetic-data and disclosure boundaries.
 
+## Confirmed remote evidence
+
+- The public `nikhilsurineni/AWS_DevOps` repository renders the OrderFlow source and documentation.
+- Remote `main` matched local commit `ead2170` after the CI repair.
+- GitHub Actions CI run 6 completed successfully for backend, frontend, and infrastructure jobs.
+- The first CI run correctly exposed two lint failures; the focused repair passed the same hosted gate.
+- Dependabot parsed the configuration and opened four dependency-update pull requests.
+
 ## Remote checkpoints
 
 Complete these only after the initial public push succeeds:
 
-1. Verify the rendered repository contains no sensitive or enterprise-only material.
-2. Confirm the first CI run passes in GitHub Actions.
-3. Enable private vulnerability reporting and secret scanning where the repository plan supports them.
-4. Protect `main`: require a pull request and the applicable CI status checks before merge.
-5. Create a practice branch, open an issue-linked pull request, observe CI, and merge it.
-6. Create the first annotated Semantic Versioning tag only after the milestone is accepted.
+1. Enable private vulnerability reporting and secret scanning where the repository plan supports them.
+2. Protect `main`: require a pull request and the applicable CI status checks before merge.
+3. Create a practice branch, open an issue-linked pull request, observe CI, and merge it.
+4. Create the first annotated Semantic Versioning tag only after the milestone is accepted.
 
 ## Negative tests
 
