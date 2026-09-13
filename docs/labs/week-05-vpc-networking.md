@@ -65,12 +65,55 @@ cost-reviewed choice for a specific workload.
 
 ## Guided manual lab
 
-1. Run the account/role/Region preflight and review the zero-NAT estimate.
-2. Create the two-AZ topology manually in the VPC console using reviewed, non-overlapping CIDRs.
+### Reviewed lab inputs
+
+Use these generic values only after the console header confirms the personal-learning account and
+`us-east-1`. The two Availability Zones must be selected from the currently available zones shown
+by the account; record their names in private session notes rather than assuming them in Git.
+
+| Resource | Name | CIDR or route |
+| --- | --- | --- |
+| VPC | `orderflow-dev-vpc` | `10.42.0.0/16` |
+| Public subnet A | `orderflow-dev-public-1` | `10.42.0.0/24` |
+| Public subnet B | `orderflow-dev-public-2` | `10.42.1.0/24` |
+| Private subnet A | `orderflow-dev-private-1` | `10.42.10.0/24` |
+| Private subnet B | `orderflow-dev-private-2` | `10.42.11.0/24` |
+| Public route table | `orderflow-dev-public` | `0.0.0.0/0` to the lab Internet Gateway |
+| Private route tables | `orderflow-dev-private-1`, `orderflow-dev-private-2` | local route only |
+
+Apply all required project tags to taggable resources. Set `ExpiresOn` to the same lab-day date used
+for teardown; never put an account ID, email address, or enterprise identifier in a tag.
+
+### Cost boundary
+
+The intended lab creates only a VPC, four subnets, route tables, route-table associations, and one
+Internet Gateway. AWS does not charge hourly for those objects themselves, but traffic and resources
+attached later can be billable. Do not create a NAT Gateway, VPC endpoint, Elastic IP, public IPv4
+address, flow-log destination, EC2 instance, load balancer, or Network Firewall during this lab.
+The signed-in Billing pages remain authoritative for actual account charges and credits.
+
+### Execution and evidence
+
+1. Run the account/role/Region preflight and review the zero-NAT boundary above.
+2. Create the two-AZ topology manually in the VPC console using the reviewed, non-overlapping CIDRs.
 3. Verify route-table associations and DNS settings in the rendered console.
 4. Compare security-group statefulness with network-ACL statelessness using diagrams and flow-log reasoning.
 5. Do not launch an instance merely to prove the VPC exists; that belongs to the EC2 lab.
-6. Delete the manual VPC after evidence is sanitized, then independently verify its subnets, route tables, and Internet Gateway are gone.
+6. Record sanitized counts and relationships only; exclude account IDs, ARNs, owner identity, and screenshots containing console-header identifiers.
+
+### Same-session teardown
+
+Delete in reverse dependency order before leaving the session:
+
+1. Confirm there are no instances, load balancers, NAT Gateways, endpoints, or unexpected network interfaces in the lab VPC.
+2. Delete the custom subnet-to-route-table associations, then the custom route tables.
+3. Delete all four lab subnets.
+4. Detach and delete the lab Internet Gateway.
+5. Delete the lab VPC.
+6. Search the VPC console by the `Project=OrderFlow` and `Environment=dev` tags and verify zero matching lab VPCs, subnets, route tables, Internet Gateways, NAT Gateways, endpoints, and Elastic IPs remain.
+
+If any dependency prevents deletion, stop and inspect that exact dependency. Do not delete an
+untagged or unrelated resource to make teardown succeed.
 
 ## Evidence status
 
