@@ -1,0 +1,25 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadAccountMetadata",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetAccountSummary",
+        "sts:GetCallerIdentity"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ExplicitlyDenyIdentityMutation",
+      "Effect": "Deny",
+      "Action": [
+        "iam:CreateUser",
+        "iam:CreateAccessKey",
+        "iam:DeleteUser",
+        "iam:PutUserPolicy"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
