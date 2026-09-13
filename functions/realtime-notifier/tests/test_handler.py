@@ -1,5 +1,6 @@
 import importlib.util
 from pathlib import Path
+from typing import ClassVar
 
 import pytest
 
@@ -40,7 +41,7 @@ class Table:
 
 
 class Gone(Exception):
-    response = {"Error": {"Code": "GoneException"}}
+    response: ClassVar[dict[str, dict[str, str]]] = {"Error": {"Code": "GoneException"}}
 
 
 class WebSocket:

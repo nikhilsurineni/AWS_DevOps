@@ -149,7 +149,7 @@ def notify(
         try:
             websocket_client.post_to_connection(ConnectionId=connection_id, Data=body)
             delivered += 1
-        except Exception as exc:  # SDK exception classes are generated at runtime.
+        except Exception as exc:  # noqa: BLE001 - AWS service exceptions are generated at runtime.
             if _error_code(exc) in {"GoneException", "410"}:
                 table.delete_item(Key={"connectionId": connection_id})
                 removed += 1
