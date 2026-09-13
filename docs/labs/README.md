@@ -38,3 +38,4 @@ Never include account IDs, usernames, emails, internal URLs, credentials, cookie
 - [Week 3: Git and GitHub](week-03-git-github.md)
 - [Week 4: IAM and STS](week-04-iam-sts.md)
 - [Week 5: VPC and networking](week-05-vpc-networking.md)
+- [Week 6: EC2, EBS, Systems Manager, ELB, and Auto Scaling](week-06-ec2-ssm.md)
