@@ -49,6 +49,26 @@ resource "terraform_data" "deployment_guard" {
       error_message = "Exactly two reviewed availability_zones are required."
     }
     precondition {
+      condition     = length(var.public_subnet_cidrs) == 2 && length(var.private_subnet_cidrs) == 2
+      error_message = "Exactly two public and two private subnet CIDRs are required."
+    }
+    precondition {
+      condition = alltrue([
+        for subnet in concat(var.public_subnet_cidrs, var.private_subnet_cidrs) :
+        try(cidrcontains(var.vpc_cidr, cidrhost(subnet, 0)), false)
+      ])
+      error_message = "Every subnet CIDR must be valid and contained by vpc_cidr."
+    }
+    precondition {
+      condition = length(distinct(concat(var.public_subnet_cidrs, var.private_subnet_cidrs))) == 4 && alltrue(flatten([
+        for left_index, left in concat(var.public_subnet_cidrs, var.private_subnet_cidrs) : [
+          for right_index, right in concat(var.public_subnet_cidrs, var.private_subnet_cidrs) :
+          left_index == right_index || try(!cidrcontains(left, cidrhost(right, 0)) && !cidrcontains(right, cidrhost(left, 0)), false)
+        ]
+      ]))
+      error_message = "Public and private subnet CIDRs must be unique and non-overlapping."
+    }
+    precondition {
       condition     = !var.enable_notifier || (var.lambda_package_path != "" && fileexists(var.lambda_package_path))
       error_message = "Package the notifier and set lambda_package_path before enabling it."
     }

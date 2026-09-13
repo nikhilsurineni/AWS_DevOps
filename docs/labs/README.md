@@ -37,3 +37,4 @@ Never include account IDs, usernames, emails, internal URLs, credentials, cookie
 - [Week 2: Toolchain preflight](toolchain-preflight.md)
 - [Week 3: Git and GitHub](week-03-git-github.md)
 - [Week 4: IAM and STS](week-04-iam-sts.md)
+- [Week 5: VPC and networking](week-05-vpc-networking.md)
