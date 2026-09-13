@@ -1,7 +1,8 @@
 # Week 4: IAM and STS
 
-Status: **Prepared** on 13 September 2026. The policy and verification script are
-locally validated; no IAM mutation has been performed.
+Status: **Partial** on 13 September 2026. The policy and verification script are locally
+validated, Access Analyzer and a service-linked role were inspected, and the custom-policy
+simulation passed in the personal-learning console. A workload-role exercise remains pending.
 
 ## Concepts to explain before the lab
 
@@ -43,9 +44,28 @@ do not broaden its permissions merely to make this lab pass.
 5. Run the custom-policy simulation and capture only action/decision pairs.
 6. Use CloudTrail Event history to locate the read-only simulation request when available.
 
+## Confirmed console evidence
+
+- The intended credit-backed learning account and `us-east-1` were visible before inspection.
+- IAM Access Analyzer showed its getting-started page, so no analyzer was configured.
+- The console distinguished external, internal, and unused-access analysis.
+- The displayed pricing made external-access analysis free, while internal and unused-access
+  analysis were paid capabilities. These values are a dated console observation, not a budget estimate.
+- No analyzer was created because the free Week 4 objective is policy reasoning and read-only discovery.
+- The roles inventory contained five AWS service-linked roles and no application workload role.
+- The inspected Auto Scaling service-linked role used an AWS-managed service policy, a one-hour
+  maximum session duration, and a trust policy limited to the Auto Scaling service principal calling
+  `sts:AssumeRole`.
+- The role, its permissions, and its trust relationship were inspected without modification.
+- The custom policy existed only inside the simulator and was not created or attached in IAM.
+- `iam:GetAccountSummary` returned **Allowed** from one explicit allow statement.
+- `iam:CreateUser` and `iam:CreateAccessKey` returned **Denied** because an explicit deny matched.
+- `s3:ListAllMyBuckets` returned **Denied** because no statement allowed it (implicit deny).
+
 ## Evidence and cleanup
 
 - Record action/decision pairs only; omit account and principal identifiers.
 - The simulation creates no policy, role, user, or access key, so no cloud teardown is expected.
 - If a later hands-on role is created, give it an expiry tag and delete it in the same lab session.
 - Never create a persistent access key for OrderFlow.
+- Current cloud teardown result: no Week 4 resources were created, so none required removal.
