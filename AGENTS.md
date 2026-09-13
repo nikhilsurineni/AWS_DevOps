@@ -8,6 +8,7 @@
 - Secret boundary: local environment or approved workload identity only; never Git, images, logs, screenshots, Terraform variables, or browser payloads.
 - Data boundary: synthetic order data only; no personal, payment, customer, or corporate information.
 - Cloud mutation gate: verify exact account, role, Region, environment, estimate, tags, and teardown before applying.
+- Learner ownership: Codex must not create, modify, or delete AWS resources. The learner performs AWS mutations manually only during the matching lesson; Codex may provide guidance and read-only verification.
 - Production and shared accounts are out of scope. Enterprise activity is restricted to the dedicated sandbox.
 - Required resource tags: `Project`, `Environment`, `Owner`, `ManagedBy`, and `ExpiresOn`.
 - Routine labs must not create NAT Gateways. EKS and load-balancer labs are time-boxed and destroyed in the same session.
