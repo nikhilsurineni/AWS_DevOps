@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible problem without exposing sensitive data
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Sanitize logs before posting. Never include secrets, tokens, account IDs,
+        internal URLs, real customer data, or enterprise screenshots.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: What happened, and which environment was affected?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Sanitized reproduction
+      description: Provide the smallest safe sequence that reproduces the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Include timestamps, correlation IDs, and error categories only when safe.
+  - type: textarea
+    id: recovery
+    attributes:
+      label: Recovery and rollback
+      description: Describe any safe workaround and how the affected change can be reverted.
+    validations:
+      required: true

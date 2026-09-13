@@ -1,0 +1,42 @@
+name: Feature or lab
+description: Propose a bounded OrderFlow capability or learning lab
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use synthetic data only. Do not include credentials, AWS account identifiers,
+        internal URLs, enterprise screenshots, or private infrastructure metadata.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Observable outcome
+      description: What behavior or learning evidence should exist when this is complete?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and boundaries
+      description: Include the environment, exclusions, cost ceiling, and data boundary.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance checks
+      description: List the focused, integration, browser, negative, and teardown checks that apply.
+      placeholder: |
+        - [ ] Focused tests pass
+        - [ ] Rendered behavior is verified
+        - [ ] Temporary cloud resources are independently confirmed removed
+    validations:
+      required: true
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback or cleanup
+      description: State how the change is reversed and which resources must be inventoried.
+    validations:
+      required: true
